@@ -7,8 +7,9 @@ mkdir -p ${LLVMM_DIR}/default
 
 
 ls_remote() {
-    local raw_versions=$( curl -s 'https://api.github.com/repos/llvm/llvm-project/releases' | jq '.[].name' )
-    for r_version in ${raw_versions}
+    remote_versions=$( curl -s 'https://api.github.com/repos/llvm/llvm-project/releases' | jq '.[].name' )
+    
+    for r_version in ${remote_versions}
     do
         if [[ $r_version == *LLVM* ]]
         then
@@ -22,7 +23,7 @@ ls_remote() {
 }
 
 
-ls() {
+list() {
     for f in "${LLVMM_DIR}"/*
     do [ -d "$f" ]
         if [[ $f == *default* ]]
@@ -54,11 +55,11 @@ is_installed() {
         fi
     done
     
-    return  # is not installed
+    return 1 # is not installed
 }
 
 
-rm () {
+remove () {
     local version=$1
     
     if [[ $version == "" ]]
@@ -71,15 +72,14 @@ rm () {
     
     if [ $rc -eq 0 ]
     then
-        echo "assd"
-        rm ${LLVMM_DIR}/13.0.0
+        rm -r "${LLVMM_DIR}/${version:?}"
+        rc=$?
         
-        # echo "version ${1} successifully removed"
-        # return 0
+        echo "version ${1} successifully removed"
+        return 0
     else
-        echo "else ss"
-        # echo "the version '${version}' is not installed"
-        # return 1
+        echo "the version '${version}' is not installed"
+        return 1
     fi
     
     
@@ -89,4 +89,15 @@ rm () {
 OPTION=$1
 OPTION_ARG=$2
 
-rm $OPTION_ARG
+case $OPTION in
+    "remove"|"rm")
+        remove "${OPTION_ARG}"
+    ;;
+    "ls-remote"|"remote")
+        ls_remote
+    ;;
+    "ls"|"local")
+        list
+    ;;
+    *);;
+esac

@@ -81,8 +81,22 @@ remove () {
         echo "the version '${version}' is not installed"
         return 1
     fi
-    
-    
+}
+
+install() {
+    echo ""
+}
+
+version_exists() {
+    echo ""
+}
+
+build_from_source() {
+    echo ""
+}
+
+make_default() {
+    echo ""
 }
 
 
@@ -98,6 +112,12 @@ case $OPTION in
     ;;
     "ls"|"local")
         list
+    ;;
+    "install"|"i")
+        echo "install"
+    ;;
+    "default"|"d")
+        echo "default"
     ;;
     *);;
 esac

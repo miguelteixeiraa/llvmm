@@ -50,7 +50,7 @@ fi
 
 
 ls_remote() {
-    remote_versions=$( curl -s 'https://api.github.com/repos/llvm/llvm-project/releases?per_page=100' | jq '.[].name' )
+    local remote_versions=$( curl -s 'https://api.github.com/repos/llvm/llvm-project/releases?per_page=100' | jq '.[].name' )
     
     for r_version in ${remote_versions}
     do
@@ -61,7 +61,7 @@ ls_remote() {
         
         local version=${r_version:0:-1}
         
-        printf "%20s\n" "v$version"
+        printf "%20s\n" "$version"
     done
 }
 
@@ -126,12 +126,42 @@ remove () {
     fi
 }
 
-install() {
-    echo ""
+version_exists() {
+    local candidate_version=$1
+    if [ -z "$candidate_version" ]
+    then
+        echo "should specify a version"
+        exit 1
+    fi
+    
+    local remote_versions
+    remote_versions=$( curl -s 'https://api.github.com/repos/llvm/llvm-project/releases?per_page=100' | jq '.[].name' )
+    
+    for r_version in ${remote_versions}
+    do
+        if [[ $r_version == *LLVM* ]]
+        then
+            continue
+        fi
+        
+        local version=${r_version:0:-1}
+        
+        if [[ $version == "$candidate_version" ]]
+        then
+            return 0
+        fi
+    done
+    
+    echo "the selected version does not exists"
+    return 1
 }
 
-version_exists() {
-    echo ""
+install() {
+    local version
+    version=$1
+    version_exists "$version"
+    
+    echo $?
 }
 
 build_from_source() {
@@ -146,7 +176,6 @@ make_default() {
 
 OPTION=$1
 OPTION_ARG1=$2
-OPTION_ARG2=$3
 
 case $OPTION in
     "remove"|"rm")
@@ -159,7 +188,7 @@ case $OPTION in
         list
     ;;
     "install"|"i")
-        echo "install"
+        install "${OPTION_ARG1}"
     ;;
     "default"|"d")
         echo "default"

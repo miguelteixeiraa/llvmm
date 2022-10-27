@@ -5,8 +5,49 @@ LLVMM_DIR=~/.llvmm
 mkdir -p ${LLVMM_DIR}/default
 
 MACHINE_ARCH=$(uname -m)
-SUPPORTED_ARCHS=( "x86_64" "arm64" )
-SUPPORTED_OS=( "darwin" "rhel" "ubuntu" "fedora" )
+SUPPORTED_ARCHS=( x86_64 arm64 )
+SUPPORTED_OS=( darwin rhel ubuntu fedora )
+
+TARGET_OS=""
+TARGET_ARCH=""
+
+resolve_system() {
+    local sys_name
+    sys_name=$(uname -a)
+    
+    for os in "${SUPPORTED_OS[@]}"
+    do
+        if [[ $sys_name == *$os* ]]
+        then
+            TARGET_OS=$os
+        fi
+    done
+}
+
+resolve_system
+if [[ $TARGET_OS == "" ]]
+then
+    echo "Seems like your OS is not supported yet :/"
+    exit 1
+fi
+
+resolve_arch() {
+    for arch in "${SUPPORTED_ARCHS[@]}"
+    do
+        if [[ $MACHINE_ARCH == "$arch" ]]
+        then
+            TARGET_ARCH=$arch
+        fi
+    done
+}
+
+resolve_arch
+if [[ $TARGET_ARCH == "" ]]
+then
+    echo "Seems like your arch is not supported yet :/"
+    exit 1
+fi
+
 
 ls_remote() {
     remote_versions=$( curl -s 'https://api.github.com/repos/llvm/llvm-project/releases?per_page=100' | jq '.[].name' )
@@ -100,7 +141,6 @@ build_from_source() {
 make_default() {
     echo ""
 }
-
 
 
 

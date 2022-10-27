@@ -1,13 +1,15 @@
 #!/bin/bash
 
-#!/bin/bash
 
 LLVMM_DIR=~/.llvmm
 mkdir -p ${LLVMM_DIR}/default
 
+MACHINE_ARCH=$(uname -m)
+SUPPORTED_ARCHS=( "x86_64" "arm64" )
+SUPPORTED_OS=( "darwin" "rhel" "ubuntu" "fedora" )
 
 ls_remote() {
-    remote_versions=$( curl -s 'https://api.github.com/repos/llvm/llvm-project/releases' | jq '.[].name' )
+    remote_versions=$( curl -s 'https://api.github.com/repos/llvm/llvm-project/releases?per_page=100' | jq '.[].name' )
     
     for r_version in ${remote_versions}
     do
@@ -100,12 +102,15 @@ make_default() {
 }
 
 
+
+
 OPTION=$1
-OPTION_ARG=$2
+OPTION_ARG1=$2
+OPTION_ARG2=$3
 
 case $OPTION in
     "remove"|"rm")
-        remove "${OPTION_ARG}"
+        remove "${OPTION_ARG1}"
     ;;
     "ls-remote"|"remote")
         ls_remote

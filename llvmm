@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 LLVMM_DIR=~/.llvmm
 mkdir -p ${LLVMM_DIR}/default
 
@@ -17,7 +16,7 @@ resolve_system() {
     
     for os in "${SUPPORTED_OS[@]}"
     do
-        if [[ $sys_name == *$os* ]]
+        if [[ $(tr [A-Z] [a-z] <<< "$sys_name") == *$os* ]]
         then
             TARGET_OS=$os
         fi
@@ -50,16 +49,22 @@ fi
 
 
 ls_remote() {
-    local remote_versions=$( curl -s 'https://api.github.com/repos/llvm/llvm-project/releases?per_page=100' | jq '.[].name' )
-    
-    for r_version in ${remote_versions}
+    local remote_versions
+    remote_versions=$( curl -s 'https://api.github.com/repos/llvm/llvm-project/releases?per_page=100' | jq '.[].name' )
+    remote_versions=($remote_versions)
+
+    for r_version in "${remote_versions[@]}"
     do
         if [[ $r_version == *LLVM* ]]
         then
             continue
+        elif [[ -z $r_version ]]
+        then
+            continue
         fi
         
-        local version=${r_version:0:-1}
+
+        local version=${r_version:0:${#r_version}-1}
         
         printf "%20s\n" "$version"
     done

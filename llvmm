@@ -147,9 +147,12 @@ version_exists() {
         if [[ $r_version == *LLVM* ]]
         then
             continue
+        elif [[ -z $r_version ]]
+        then
+            continue
         fi
         
-        local version=${r_version:0:-1}
+        local version=${r_version:0:${#r_version}-1}
         
         if [[ $version == "$candidate_version" ]]
         then
